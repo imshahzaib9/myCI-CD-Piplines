@@ -1,0 +1,5 @@
+vendor/
+visitor_count.txt
+.env
+*.log
+.DS_Store
