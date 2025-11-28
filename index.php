@@ -1,88 +1,64 @@
 <?php
-/**
- * PHP CI/CD Demo Application
- * Main entry point with visitor counter
- */
-
 // Configuration
-$countFile = 'visitor_count.txt';
+$app_name = "PHP CI/CD Demo Application";
+$version = "1.0.0";
+$environment = getenv('APP_ENV') ?: 'production';
 
-// Initialize visitor count file if it doesn't exist
-if (!file_exists($countFile)) {
-    file_put_contents($countFile, '0');
-}
-
-// Read and increment visitor count
-$count = (int)file_get_contents($countFile);
-$count++;
-file_put_contents($countFile, $count);
-
-// Get server information
-$phpVersion = phpversion();
-$serverSoftware = $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown';
-$deploymentTime = date('Y-m-d H:i:s');
+// Get deployment info
+$deploy_time = file_exists('deploy_info.txt') ? file_get_contents('deploy_info.txt') : 'Unknown';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHP CI/CD Demo Application</title>
+    <title><?php echo $app_name; ?></title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🚀 Welcome to CI/CD Demo App</h1>
-            <p class="subtitle">This application was automatically deployed using GitHub Actions!</p>
+            <h1>🚀 <?php echo $app_name; ?></h1>
+            <p class="subtitle">Automated Deployment with GitHub Actions</p>
         </header>
 
-        <div class="stats-grid">
-            <div class="stat-card primary">
-                <h2>Visitor Count</h2>
-                <p class="stat-number"><?php echo number_format($count); ?></p>
-                <p class="stat-label">Total Visits</p>
+        <div class="info-cards">
+            <div class="card">
+                <h3>📦 Version</h3>
+                <p><?php echo $version; ?></p>
             </div>
-
-            <div class="stat-card secondary">
-                <h2>Deployment Info</h2>
-                <p class="stat-text"><?php echo $deploymentTime; ?></p>
-                <p class="stat-label">Last Deployed</p>
+            <div class="card">
+                <h3>🌍 Environment</h3>
+                <p><?php echo strtoupper($environment); ?></p>
             </div>
-        </div>
-
-        <div class="info-section">
-            <h3>📊 System Information</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">PHP Version:</span>
-                    <span class="info-value"><?php echo $phpVersion; ?></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Server:</span>
-                    <span class="info-value"><?php echo $serverSoftware; ?></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Status:</span>
-                    <span class="info-value status-active">✓ Active</span>
-                </div>
+            <div class="card">
+                <h3>⏰ Last Deployed</h3>
+                <p><?php echo $deploy_time; ?></p>
+            </div>
+            <div class="card">
+                <h3>💻 Server Info</h3>
+                <p><?php echo php_uname('n'); ?></p>
             </div>
         </div>
 
         <div class="features">
-            <h3>✨ Pipeline Features</h3>
+            <h2>✨ Features Demonstrated</h2>
             <ul>
-                <li>✅ Automated Testing with PHPUnit</li>
-                <li>✅ Code Quality Checks</li>
-                <li>✅ Continuous Integration</li>
-                <li>✅ Automatic Deployment</li>
-                <li>✅ Version Control with Git</li>
+                <li>✅ Automated CI/CD Pipeline</li>
+                <li>✅ GitHub Actions Workflow</li>
+                <li>✅ Automated Testing</li>
+                <li>✅ Automated Deployment</li>
+                <li>✅ Environment Variables</li>
             </ul>
         </div>
 
-        <footer>
-            <p>Powered by GitHub Actions | PHP <?php echo $phpVersion; ?></p>
-        </footer>
+        <div class="api-section">
+            <h2>🔌 API Endpoint Test</h2>
+            <button onclick="testAPI()">Test API</button>
+            <pre id="api-response"></pre>
+        </div>
     </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

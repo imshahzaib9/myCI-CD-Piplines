@@ -1,5 +1,5 @@
-vendor/
-visitor_count.txt
 .env
-*.log
+vendor/
+node_modules/
 .DS_Store
+deploy_info.txt

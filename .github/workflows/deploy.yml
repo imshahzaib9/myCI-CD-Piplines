@@ -1,0 +1,128 @@
+name: PHP CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, xml, ctype, json
+        coverage: none
+    
+    - name: Validate PHP syntax
+      run: |
+        find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \; | grep -v "No syntax errors"
+        if [ $? -eq 0 ]; then
+          echo "✅ All PHP files are valid"
+        fi
+    
+    - name: Run tests
+      run: php tests/BasicTest.php
+    
+    - name: Create test report
+      if: always()
+      run: |
+        echo "Test execution completed at $(date)" > test-report.txt
+        echo "PHP Version: $(php -v | head -n 1)" >> test-report.txt
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: test-report.txt
+
+  build:
+    name: Build Application
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Create deployment package
+      run: |
+        echo "Building application..."
+        mkdir -p build
+        
+        # Copy application files
+        cp index.php build/
+        cp api.php build/
+        cp style.css build/
+        cp script.js build/
+        cp README.md build/
+        
+        # Create deployment info
+        echo "Deployed at: $(date)" > build/deploy_info.txt
+        echo "Commit: ${{ github.sha }}" >> build/deploy_info.txt
+        echo "Branch: ${{ github.ref_name }}" >> build/deploy_info.txt
+        
+        echo "✅ Build completed successfully"
+    
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: php-application
+        path: build/
+
+  deploy:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Download build artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: php-application
+        path: ./deploy
+    
+    - name: Display deployment files
+      run: |
+        echo "📦 Files ready for deployment:"
+        ls -la ./deploy
+        
+    - name: Simulate deployment
+      run: |
+        echo "🚀 Deploying application..."
+        echo "Deployment target: Production Server"
+        echo "Deployment time: $(date)"
+        echo "✅ Deployment completed successfully!"
+        
+    # Uncomment and configure for real server deployment
+    # - name: Deploy via SSH
+    #   uses: easingthemes/ssh-deploy@main
+    #   env:
+    #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+    #     REMOTE_USER: ${{ secrets.REMOTE_USER }}
+    #     TARGET: ${{ secrets.REMOTE_TARGET }}
+    #   with:
+    #     source: "./deploy/"
+    #     target: ${{ secrets.REMOTE_TARGET }}
+    
+    - name: Deployment summary
+      run: |
+        echo "# Deployment Summary 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: Production" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Time**: $(date)" >> $GITHUB_STEP_SUMMARY

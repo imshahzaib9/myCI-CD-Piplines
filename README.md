@@ -1,21 +1,17 @@
 # PHP CI/CD Demo Application
 
-This is a sample PHP application with automated CI/CD pipeline using GitHub Actions.
+This is a demonstration PHP application with automated CI/CD pipeline using GitHub Actions.
 
 ## Features
-- Visitor counter
 - Automated testing
-- Continuous deployment
-- Modern UI design
+- Automated deployment
+- CI/CD with GitHub Actions
+- Modern responsive UI
 
-## Local Setup
+## Local Development
 1. Clone the repository
-2. Run `composer install`
-3. Start PHP server: `php -S localhost:8000`
-4. Open browser to `http://localhost:8000`
+2. Run a local PHP server: `php -S localhost:8000`
+3. Open http://localhost:8000 in your browser
 
-## CI/CD Pipeline
-This project uses GitHub Actions for:
-- Automated testing on push
-- Code quality checks
-- Automatic deployment to production
+## Deployment
+The application automatically deploys on push to main branch via GitHub Actions.
