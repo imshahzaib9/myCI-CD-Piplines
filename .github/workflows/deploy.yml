@@ -25,9 +25,25 @@ jobs:
     
     - name: Validate PHP syntax
       run: |
-        find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \; | grep -v "No syntax errors"
-        if [ $? -eq 0 ]; then
-          echo "✅ All PHP files are valid"
+        echo "🔍 Checking PHP syntax..."
+        ERRORS=0
+        while IFS= read -r -d '' file; do
+          php -l "$file" > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "❌ Syntax error in: $file"
+            php -l "$file"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "✅ Valid: $file"
+          fi
+        done < <(find . -name "*.php" -not -path "./vendor/*" -print0)
+        
+        if [ $ERRORS -eq 0 ]; then
+          echo "✅ All PHP files are syntactically valid!"
+          exit 0
+        else
+          echo "❌ Found $ERRORS file(s) with syntax errors"
+          exit 1
         fi
     
     - name: Run tests
